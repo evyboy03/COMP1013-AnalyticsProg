@@ -21,10 +21,12 @@ geolocation = read.csv("geolocation.csv")
 
 ## Task 1: Product Prices and Shipping Costs
 
+## Part 1
+
 ### Methodology & Rationale: 
 To examine how item prices are distributed, we compute both the sample mean and median, as we display the data with a histogram as well. As histogram is appropriate for visualising the frequency distribution and skewness of a continuous numerical variable(price) and computing both mean and median allows us to compare the overall average price against the middle value, which helps us to see how strongly the distribution is skewed.
 
-```{r}
+```{r task1-part1}
 # Load tidyverse 
 library(tidyverse)
 
@@ -44,3 +46,35 @@ cat("The median price is", medianPrice, "BRL\n")
 ```
 ### Findings:
 The histogram shows that item prices in order_items dataset follow a strongly right-skewed distribution, with a sample mean price is 120.65 BRL and a median price is 74.99 BRL. As the mean is over 60% higher than the median, so it means that a small number of high-priced items pull the overall average upward, whereas the median shows that half of all items cost 74.99 BRL or less.
+
+
+
+
+## Part 2: 
+
+### Methodology & Rationale: 
+To examine how shipping cost relates to product weight, we join order_items.csv and products.csv using `inner_join()` with the shared key `product_id`, so each ordered item is matched with its physical weight (product_weight_g). Then, We are going to plot the freight value against product weight, as they are continuous numerical variables, which allows us to observe the trends as well as the spread of shipping costs across product weight. For additional analysis, we also compute the Pearson correlation coefficient(`cor()`) to measure the strength of the linear relationship.
+
+
+```{r task1-part2}
+# Join orderItems and products on product_id
+orderProducts = inner_join(orderItems, products, by = "product_id") %>%
+  filter(!is.na(product_weight_g), !is.na(freight_value))
+
+# Compute the pearson correlation between product weight and freight value
+weightFreightCor = cor(orderProducts$product_weight_g, orderProducts$freight_value)
+
+cat("Correlation between product weight and freight value:", weightFreightCor, "\n")
+
+ggplot(orderProducts, aes(x = product_weight_g, y = freight_value)) +
+  geom_point()+
+  labs(title = "Freight value vs Product Weight",
+       x = "Product Weight(g)",
+       y = "Freight Value(BRL)")
+
+```
+
+
+
+### Findings: 
+From the scatter plot above, it shows us that as product weight increases, the shipping cost tends to increase as well. From the Pearson correlation(approx 0.6), it indicates us a moderately strong and positive linear relationship between Freight value and Product Weight.As looking at the plot in detail, most ordered items weigh under 10,000 grams with shipping costs below 100 BRL, while heavier items have higher shipping fees and spread out more widely(including a visible vertical line at 30,000 grams). This wider spread among heavier items indicates that while weight drives shipping cost, other factors like delivery distance and package dimensions also influence the freight values. 
