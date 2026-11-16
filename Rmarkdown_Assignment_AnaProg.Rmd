@@ -1,0 +1,21 @@
+---
+title: "COMP1013_Assignment - Analytics Programming"
+author: "Evan Tjandra Chow | sID: 22209188"
+date: "2026-11-16"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+orderItems = read.csv("order_items.csv")
+products = read.csv("products.csv")
+orders = read.csv("orders.csv")
+customers = read.csv("customers.csv")
+payments = read.csv("payments.csv")
+sellers = read.csv("sellers.csv")
+geolocation = read.csv("geolocation.csv")
+```
+
