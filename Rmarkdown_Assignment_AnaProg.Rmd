@@ -19,3 +19,28 @@ sellers = read.csv("sellers.csv")
 geolocation = read.csv("geolocation.csv")
 ```
 
+## Task 1: Product Prices and Shipping Costs
+
+### Methodology & Rationale: 
+To examine how item prices are distributed, we compute both the sample mean and median, as we display the data with a histogram as well. As histogram is appropriate for visualising the frequency distribution and skewness of a continuous numerical variable(price) and computing both mean and median allows us to compare the overall average price against the middle value, which helps us to see how strongly the distribution is skewed.
+
+```{r}
+# Load tidyverse 
+library(tidyverse)
+
+# Visualise the dist of item prices using a histogram  
+ggplot(orderItems, aes(x = price)) + 
+  geom_histogram(bins = 30, fill = "steelblue", color = "white")+ 
+  labs(title = "Distribution of Item Prices",
+       x = "Item Price",
+       y = "Number of Items")
+
+# Calculate and report the mean and median
+meanPrice = mean(orderItems$price, na.rm = TRUE)
+medianPrice = median(orderItems$price, na.rm = TRUE)
+
+cat("The mean price is", meanPrice, "BRL\n")
+cat("The median price is", medianPrice, "BRL\n")
+```
+### Findings:
+The histogram shows that item prices in order_items dataset follow a strongly right-skewed distribution, with a sample mean price is 120.65 BRL and a median price is 74.99 BRL. As the mean is over 60% higher than the median, so it means that a small number of high-priced items pull the overall average upward, whereas the median shows that half of all items cost 74.99 BRL or less.
