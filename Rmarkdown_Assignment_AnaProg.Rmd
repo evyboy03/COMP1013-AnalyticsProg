@@ -120,7 +120,40 @@ cat("Percentage of orders not delivered is",round(notDeliveredPercent, 2), "%")
 From the table and bar chart, it shows us that **96,478** orders were successfully delivered as it dominates all of the orders, while the orders that were not delivered is **2.98%**. Among the non-delivered order statuses, shipped status holds the largest amount, as it has **1107** orders, which we assume that the items are still in transit when the dataset was recorded. Then, followed by the canceled status, which is **625** orders and the unavailable status in **609** orders. Lastly, followed by the invoiced in **314** orders, processing in **301** orders, created in **5** orders, and approved in **2** orders.
 
 
+## Part 2:
+
+### Methodology & Rationale:
+To calculate the percentage of orders not delivered in each customer state, we join order and customers dataset using `inner_join()` on `customer_id`, then group the records by `customer_state` because we want to find for each customer state, and compute the percentage where `order_status != "delivered"`. Later on, we visualize it with a bar chart `geom_col` with `coord_flip()` so that all 27 state values can be easily compared side by side without overlapping labels.
 
 
+```{r task2-part2}
+library(tidyverse)
+
+# Calculate the percentage orders not delivered in each customer state by joining the orders and customer dataset
+ordersCustStatePercent = orders %>%
+  inner_join(customers, by = "customer_id")%>%
+  count(customer_state, isNotDeliver = (order_status != "delivered"), name = "orderCount")%>%
+  group_by(customer_state)%>%
+  mutate(totalOrders = sum(orderCount), percentage = (orderCount / totalOrders) * 100) %>%
+  filter(isNotDeliver == TRUE)
+
+# Display the table
+ordersCustStatePercent
+
+# Visualize the percentage orders not delivered by customer state
+ggplot(ordersCustStatePercent, aes(x = customer_state, y = percentage )) + 
+  geom_col(fill = "red") +
+  coord_flip() +
+  labs(title = "Customer state vs Percentage orders not delivered",
+       x = "Customer State",
+       y = "Percentage of Orders NOT delivered (%)")
+  
+  
+
+```
 
 
+### Findings:
+From the summary table and bar chart, **RR** shows by far the highest percentage of non-delivered orders at approximately **10.87%** (5 non-delivered orders), followed by **SE** (**4.29%**, 15 orders), **CE** (**4.27%**, 57 orders), **MA** (**4.02%**, 30 orders), **RO** (**3.95%**), and **RJ** (**3.91%**). Also, **AC** has the lowest non-delivery rate at **1.23%** (1 order), followed by **AP** (**1.47%**, 1 order) and **ES** (**1.87%**, 38 orders).
+
+However, these percentages should be interpreted carefully alongside each state's total order volume. Because **RR** has a very small total number of orders (46 orders overall), this causes its percentage of non-delivered orders to jump significantly. So, high volume states like **SP** (2.98% across 41,746 orders), **RJ**(3.91% across 12,852 orders), **MG** (2.42% across 11,635 orders), provide a much more reliable estimate than states with small sample sizes.
