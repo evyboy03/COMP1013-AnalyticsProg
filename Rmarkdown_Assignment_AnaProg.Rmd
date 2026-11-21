@@ -78,3 +78,49 @@ ggplot(orderProducts, aes(x = product_weight_g, y = freight_value)) +
 
 ### Findings: 
 From the scatter plot above, it shows us that as product weight increases, the shipping cost tends to increase as well. From the Pearson correlation(approx 0.6), it indicates us a moderately strong and positive linear relationship between Freight value and Product Weight.As looking at the plot in detail, most ordered items weigh under 10,000 grams with shipping costs below 100 BRL, while heavier items have higher shipping fees and spread out more widely(including a visible vertical line at 30,000 grams). This wider spread among heavier items indicates that while weight drives shipping cost, other factors like delivery distance and package dimensions also influence the freight values. 
+
+
+
+## Task 2: Orders That Were Not Delivered
+
+## Part 1: 
+
+### Methodology & Rationale:
+To evaluate the percentage of orders, we group the `orders` dataset by `order_status` using count() to find the number of orders in each status, and mutate() to calculate each status's percentage of all orders. After that, we visualise these results using a bar chart `geom_col()` to compare the percentages across the discrete `order_status` categories. Then, we filter for the orders where `order_status != "delivered"` to calculate the overall percentage of orders that weren't delivered.
+
+```{r task2-part1}
+# Load Tidyverse
+library(tidyverse)
+
+# Count the num of orders in each order_status & compute the percentage of all orders
+calcStatusAndPercentageOrd = orders %>%
+  count(order_status, name = "orderCount")%>%
+  mutate(percentage = (orderCount / sum(orderCount)) * 100)
+
+# Display the table of counts and percentages
+calcStatusAndPercentageOrd
+
+# Visualize the percentage of orders in each order status with a bar chart
+ggplot(calcStatusAndPercentageOrd, aes(x = order_status, y = percentage)) +
+  geom_col(fill = "orange") +
+  labs(title = "Percentage of orders by order status",
+       x = "Order status",
+       y = "Pecentage of all orders / %")
+
+# Compute the overall percentage of orders whose status were not delivered
+notDeliveredPercent = calcStatusAndPercentageOrd %>%
+  filter(order_status != "delivered")%>%
+  summarise(percentage = sum(percentage))%>%
+  pull(percentage)
+
+cat("Percentage of orders not delivered is",round(notDeliveredPercent, 2), "%")
+
+```
+### Findings:
+From the table and bar chart, it shows us that **96,478** orders were successfully delivered as it dominates all of the orders, while the orders that were not delivered is **2.98%**. Among the non-delivered order statuses, shipped status holds the largest amount, as it has **1107** orders, which we assume that the items are still in transit when the dataset was recorded. Then, followed by the canceled status, which is **625** orders and the unavailable status in **609** orders. Lastly, followed by the invoiced in **314** orders, processing in **301** orders, created in **5** orders, and approved in **2** orders.
+
+
+
+
+
+
