@@ -187,3 +187,26 @@ ggplot(paymentFreq, aes(x = payment_type, y = percentage)) +
 ```
 ### Findings:
 From the summary table and bar chart, `credit_card` has the highest payment usage (76,795) and percentage at **73.92%**, followed by `boleto` payment in **19,784** payments (**19.04%**). This shows that `credit_card` and `boleto` payments altogether make up **92.97%**, as they have a strong preference when it comes to payment. The `voucher` payment also has 5,775 payments (**5.56%**), followed by `debit_card` at 1,529 payments (**1.47%**), and the least payment is `not_defined` at 3 payments (**0.003%**).
+
+## Part 2:
+
+### Methodology & Rationale:
+To compare the payment types against payment values, we plot them using a boxplot `geom_boxplot` with a $\log_{10}$ y-axis scale `scale_y_log10()`, because payment values are heavily right-skewed with extreme high outliers, which using `scale_y_log10()` allows us to clearly compare the median, IQR, max, and min. Then, we could identify the payment types that are used for larger or smaller amounts.
+
+
+```{r task3-part2}
+ggplot(payments, aes(x = payment_type, y = payment_value)) +
+  geom_boxplot(fill = "purple") +
+  labs(title = "Payment value against Payment Type",
+       x = "Payment Type",
+       y = "Payment Value") +
+  scale_y_log10()
+```
+### Findings:
+From the $\log_{10}$ boxplot, the distribution of `payment_value`
+differs across payment methods:
+
+1) **Payment types that are used for larger amounts** are `credit_card`, `boleto`, and `debit_card`, as this 3 payment types sits higher on the vertical axis, with their medians and interquartile ranges(middle 50% of transactions) centered around 1e+02 ($10^2$). As `credit_card` shows the largest amount of payment value, as it shows the highest median, upper quartile (top end of the box), and extreme upper outliers (trail at the top) likely because customers prefer credit cards and more practical for high value purchases among other transactions. Other payments like `boleto` and `debit_card` followed closely with lower medians and narrower upper outliers ranges, meaning they also been used for high value of purchased. 
+
+2) **Payment types that are used for smaller amounts** are `voucher` and `not_defined`. The voucher's box and median ranges from 1e+01 ($10^1$) to 1e+02 ($10^2$), with the lower outliers. This indicates that vouchers are primarily used for smaller amounts. As, `not_defined` does not appear on the $\log_{10}$ plot because its transactions have a payment value of 0 and $\log_{10}(0)$ is undefined. While, `credit_card` is also used for smaller amounts, as it displays a trail at its lower outliers ranges from 1e-01 ($10^{-1}$) up to 1e+01 ($10^1$).
+
