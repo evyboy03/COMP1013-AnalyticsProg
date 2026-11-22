@@ -58,7 +58,8 @@ To examine how shipping cost relates to product weight, we join order_items.csv 
 
 ```{r task1-part2}
 # Join orderItems and products on product_id
-orderProducts = inner_join(orderItems, products, by = "product_id") %>%
+orderProducts = orderItems %>% 
+  inner_join(products, by = "product_id") %>%
   filter(!is.na(product_weight_g), !is.na(freight_value))
 
 # Compute the pearson correlation between product weight and freight value
@@ -157,3 +158,32 @@ ggplot(ordersCustStatePercent, aes(x = customer_state, y = percentage )) +
 From the summary table and bar chart, **RR** shows by far the highest percentage of non-delivered orders at approximately **10.87%** (5 non-delivered orders), followed by **SE** (**4.29%**, 15 orders), **CE** (**4.27%**, 57 orders), **MA** (**4.02%**, 30 orders), **RO** (**3.95%**), and **RJ** (**3.91%**). Also, **AC** has the lowest non-delivery rate at **1.23%** (1 order), followed by **AP** (**1.47%**, 1 order) and **ES** (**1.87%**, 38 orders).
 
 However, these percentages should be interpreted carefully alongside each state's total order volume. Because **RR** has a very small total number of orders (46 orders overall), this causes its percentage of non-delivered orders to jump significantly. So, high volume states like **SP** (2.98% across 41,746 orders), **RJ**(3.91% across 12,852 orders), **MG** (2.42% across 11,635 orders), provide a much more reliable estimate than states with small sample sizes.
+
+## Task 3
+
+## Part 1:
+
+### Methodology & Rationale: 
+To analyse the usage of frequency of each payment type, we use `count()` to group and count each of the type and we use `mutate()` to compute the percentage of total payments in a new column. Then, we visualize the percentage of payments against the payment type using a bar chart `geom_col()`, as its easier for us to compare discrete categories side by side.
+
+
+
+```{r task3-part1}
+# Count the usage of frequency of each payment type and compute its percentage
+paymentFreq = payments %>%
+  count(payment_type, name = "paymentCount")%>%
+  mutate(percentage = (paymentCount/ sum(paymentCount)) * 100)
+
+# Display the table
+paymentFreq
+
+# Visualise the percentage of payments against payment type with geom_col
+ggplot(paymentFreq, aes(x = payment_type, y = percentage)) + 
+  geom_col(fill = "lightgreen") +
+  labs(title = "Percentage of Payments by Payment Type", 
+       x = "Payment Type", 
+       y = "Percentage of Payments (%)")
+
+```
+### Findings:
+From the summary table and bar chart, `credit_card` has the highest payment usage (76,795) and percentage at **73.92%**, followed by `boleto` payment in **19,784** payments (**19.04%**). This shows that `credit_card` and `boleto` payments altogether make up **92.97%**, as they have a strong preference when it comes to payment. The `voucher` payment also has 5,775 payments (**5.56%**), followed by `debit_card` at 1,529 payments (**1.47%**), and the least payment is `not_defined` at 3 payments (**0.003%**).
