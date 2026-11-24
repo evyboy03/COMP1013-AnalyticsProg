@@ -210,3 +210,35 @@ differs across payment methods:
 
 2) **Payment types that are used for smaller amounts** are `voucher` and `not_defined`. The voucher's box and median ranges from 1e+01 ($10^1$) to 1e+02 ($10^2$), with the lower outliers. This indicates that vouchers are primarily used for smaller amounts. As, `not_defined` does not appear on the $\log_{10}$ plot because its transactions have a payment value of 0 and $\log_{10}(0)$ is undefined. While, `credit_card` is also used for smaller amounts, as it displays a trail at its lower outliers ranges from 1e-01 ($10^{-1}$) up to 1e+01 ($10^1$).
 
+## Bonus Analysis: Geographic distribution of sellers
+
+### Methodology & Rationale:
+To explore where marketplace sellers are located across Brazil, we join `sellers.csv` with `geolocation.csv` using the zip code prefix (`seller_zip_code_prefix` = `geolocation_zip_code_prefix`). Because `geolocation.csv` contains multiple coordinate readings per zip code prefix, we first remove duplicate rows from it by grouping by `geolocation_zip_code_prefix` and keeping the first coordinate pair (`slice(1)`) to prevent many-to-many join duplication. Then, we plot `geolocation_lng` against `geolocation_lat` using `geom_point(alpha = 0.5)` so overlapping points reveal areas of high seller density.
+
+
+```{r bonusAnalysis}
+# Keep one coordinate pair per zip code prefix to prevent M:N join duplication
+geoUnique = geolocation %>%
+  group_by(geolocation_zip_code_prefix) %>%
+  slice(1)%>%
+  ungroup()
+
+# join Sellers with their latitude and longitude coordinates
+sellerLatLng = sellers %>%
+  inner_join(geoUnique, by = c("seller_zip_code_prefix" = "geolocation_zip_code_prefix"))
+
+# Visualize the Sellers location with lat and lng by Scatter plot
+ggplot(sellerLatLng, aes(x = geolocation_lng, y = geolocation_lat)) +
+  geom_point(alpha = 0.5) +
+  labs(title = "Geographic Distribution of sellers in Brazil",
+       x = "Longitude",
+       y = "Latitude")
+
+
+```
+
+### Findings:
+From this scatter plot above, we can see that the seller locations across Brazil are unevenly distributed, as the heaviest concentration of sellers sits between longitudes `-55` and `-40`, and latitudes `-20` and `-30` (geographically corresponding to Southeast and South Brazil). At the upper left region of the plot (latitudes above `-15` and longitudes at the west around `-60` to `-70`) shows a very few sellers appear, corresponding to Brazil's northern and western side.
+
+This correlates to Task 1 (higher freight costs) and Task 2 (higher non-delivery rates) from our earlier analysis, as most sellers are located in one region rather than spread evenly across the country. This means that orders sent to customers in distant regions must travel much farther.
+
