@@ -1,15 +1,22 @@
 ---
 title: "COMP1013_Assignment - Analytics Programming"
-author: "Evan Tjandra Chow | sID: 22209188"
+author: 'Evan Tjandra Chow | sID: 22209188'
 date: "2026-11-16"
-output: word_document
+output:
+  word_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r load-data, message=FALSE, warning=FALSE}
+# Load tidyverse and ggplot2
+library(tidyverse)
+library(ggplot2)
+
+# Load the data
 orderItems = read.csv("order_items.csv")
 products = read.csv("products.csv")
 orders = read.csv("orders.csv")
@@ -27,9 +34,6 @@ geolocation = read.csv("geolocation.csv")
 To examine how item prices are distributed, we compute both the sample mean and median, as we display the data with a histogram as well. As histogram is appropriate for visualising the frequency distribution and skewness of a continuous numerical variable(price) and computing both mean and median allows us to compare the overall average price against the middle value, which helps us to see how strongly the distribution is skewed.
 
 ```{r task1-part1}
-# Load tidyverse 
-library(tidyverse)
-
 # Visualise the dist of item prices using a histogram  
 ggplot(orderItems, aes(x = price)) + 
   geom_histogram(bins = 30, fill = "steelblue", color = "white")+ 
@@ -67,6 +71,7 @@ weightFreightCor = cor(orderProducts$product_weight_g, orderProducts$freight_val
 
 cat("Correlation between product weight and freight value:", weightFreightCor, "\n")
 
+# Visualise the Freight value against product weight by Scatter Plot
 ggplot(orderProducts, aes(x = product_weight_g, y = freight_value)) +
   geom_point()+
   labs(title = "Freight value vs Product Weight",
@@ -90,9 +95,6 @@ From the scatter plot above, it shows us that as product weight increases, the s
 To evaluate the percentage of orders, we group the `orders` dataset by `order_status` using count() to find the number of orders in each status, and mutate() to calculate each status's percentage of all orders. After that, we visualise these results using a bar chart `geom_col()` to compare the percentages across the discrete `order_status` categories. Then, we filter for the orders where `order_status != "delivered"` to calculate the overall percentage of orders that weren't delivered.
 
 ```{r task2-part1}
-# Load Tidyverse
-library(tidyverse)
-
 # Count the num of orders in each order_status & compute the percentage of all orders
 calcStatusAndPercentageOrd = orders %>%
   count(order_status, name = "orderCount")%>%
@@ -117,6 +119,8 @@ notDeliveredPercent = calcStatusAndPercentageOrd %>%
 cat("Percentage of orders not delivered is",round(notDeliveredPercent, 2), "%")
 
 ```
+
+
 ### Findings:
 From the table and bar chart, it shows us that **96,478** orders were successfully delivered as it dominates all of the orders, while the orders that were not delivered is **2.98%**. Among the non-delivered order statuses, shipped status holds the largest amount, as it has **1107** orders, which we assume that the items are still in transit when the dataset was recorded. Then, followed by the canceled status, which is **625** orders and the unavailable status in **609** orders. Lastly, followed by the invoiced in **314** orders, processing in **301** orders, created in **5** orders, and approved in **2** orders.
 
@@ -128,8 +132,6 @@ To calculate the percentage of orders not delivered in each customer state, we j
 
 
 ```{r task2-part2}
-library(tidyverse)
-
 # Calculate the percentage orders not delivered in each customer state by joining the orders and customer dataset
 ordersCustStatePercent = orders %>%
   inner_join(customers, by = "customer_id")%>%
@@ -154,10 +156,12 @@ ggplot(ordersCustStatePercent, aes(x = customer_state, y = percentage )) +
 ```
 
 
+
 ### Findings:
 From the summary table and bar chart, **RR** shows by far the highest percentage of non-delivered orders at approximately **10.87%** (5 non-delivered orders), followed by **SE** (**4.29%**, 15 orders), **CE** (**4.27%**, 57 orders), **MA** (**4.02%**, 30 orders), **RO** (**3.95%**), and **RJ** (**3.91%**). Also, **AC** has the lowest non-delivery rate at **1.23%** (1 order), followed by **AP** (**1.47%**, 1 order) and **ES** (**1.87%**, 38 orders).
 
 However, these percentages should be interpreted carefully alongside each state's total order volume. Because **RR** has a very small total number of orders (46 orders overall), this causes its percentage of non-delivered orders to jump significantly. So, high volume states like **SP** (2.98% across 41,746 orders), **RJ**(3.91% across 12,852 orders), **MG** (2.42% across 11,635 orders), provide a much more reliable estimate than states with small sample sizes.
+
 
 ## Task 3
 
@@ -185,6 +189,9 @@ ggplot(paymentFreq, aes(x = payment_type, y = percentage)) +
        y = "Percentage of Payments (%)")
 
 ```
+
+
+
 ### Findings:
 From the summary table and bar chart, `credit_card` has the highest payment usage (76,795) and percentage at **73.92%**, followed by `boleto` payment in **19,784** payments (**19.04%**). This shows that `credit_card` and `boleto` payments altogether make up **92.97%**, as they have a strong preference when it comes to payment. The `voucher` payment also has 5,775 payments (**5.56%**), followed by `debit_card` at 1,529 payments (**1.47%**), and the least payment is `not_defined` at 3 payments (**0.003%**).
 
@@ -194,7 +201,7 @@ From the summary table and bar chart, `credit_card` has the highest payment usag
 To compare the payment types against payment values, we plot them using a boxplot `geom_boxplot` with a $\log_{10}$ y-axis scale `scale_y_log10()`, because payment values are heavily right-skewed with extreme high outliers, which using `scale_y_log10()` allows us to clearly compare the median, IQR, max, and min. Then, we could identify the payment types that are used for larger or smaller amounts.
 
 
-```{r task3-part2}
+```{r task3-part2, warning=FALSE}
 ggplot(payments, aes(x = payment_type, y = payment_value)) +
   geom_boxplot(fill = "purple") +
   labs(title = "Payment value against Payment Type",
@@ -202,6 +209,9 @@ ggplot(payments, aes(x = payment_type, y = payment_value)) +
        y = "Payment Value") +
   scale_y_log10()
 ```
+
+
+
 ### Findings:
 From the $\log_{10}$ boxplot, the distribution of `payment_value`
 differs across payment methods:
@@ -209,6 +219,7 @@ differs across payment methods:
 1) **Payment types that are used for larger amounts** are `credit_card`, `boleto`, and `debit_card`, as this 3 payment types sits higher on the vertical axis, with their medians and interquartile ranges(middle 50% of transactions) centered around 1e+02 ($10^2$). As `credit_card` shows the largest amount of payment value, as it shows the highest median, upper quartile (top end of the box), and extreme upper outliers (trail at the top) likely because customers prefer credit cards and more practical for high value purchases among other transactions. Other payments like `boleto` and `debit_card` followed closely with lower medians and narrower upper outliers ranges, meaning they also been used for high value of purchased. 
 
 2) **Payment types that are used for smaller amounts** are `voucher` and `not_defined`. The voucher's box and median ranges from 1e+01 ($10^1$) to 1e+02 ($10^2$), with the lower outliers. This indicates that vouchers are primarily used for smaller amounts. As, `not_defined` does not appear on the $\log_{10}$ plot because its transactions have a payment value of 0 and $\log_{10}(0)$ is undefined. While, `credit_card` is also used for smaller amounts, as it displays a trail at its lower outliers ranges from 1e-01 ($10^{-1}$) up to 1e+01 ($10^1$).
+
 
 ## Bonus Analysis: Geographic distribution of sellers
 
@@ -236,6 +247,8 @@ ggplot(sellerLatLng, aes(x = geolocation_lng, y = geolocation_lat)) +
 
 
 ```
+
+
 
 ### Findings:
 From this scatter plot above, we can see that the seller locations across Brazil are unevenly distributed, as the heaviest concentration of sellers sits between longitudes `-55` and `-40`, and latitudes `-20` and `-30` (geographically corresponding to Southeast and South Brazil). At the upper left region of the plot (latitudes above `-15` and longitudes at the west around `-60` to `-70`) shows a very few sellers appear, corresponding to Brazil's northern and western side.
